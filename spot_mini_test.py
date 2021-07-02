@@ -20,6 +20,6 @@ if __name__ == '__main__':
 
     while (1):
         location=[10, 10, 120]
-        location[1] = int(input("y위치:"))
+        location[2] = int(input("z위치:"))
         theta = kinematics.leg_IK(location)
         leg.front_R(theta)
