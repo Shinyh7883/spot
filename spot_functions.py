@@ -45,7 +45,7 @@ class kinematics:
         l1 = 50
         l2 = 105
         l3 = 130
-        t1 = 0p[oqewtryui]\
+        t1 = 0
         t2 = 70
         t3 = 50
         #################
