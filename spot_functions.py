@@ -39,3 +39,13 @@ class kinematics:
         theta = [np.rad2deg(theta1), np.rad2deg(theta2), np.rad2deg(theta3)]
 
         return theta
+
+    def leg_FK(self, theta):
+        ####길이, 각도####
+        l1 = 50
+        l2 = 105
+        l3 = 130
+        t1 = 0p[oqewtryui]\
+        t2 = 70
+        t3 = 50
+        #################
