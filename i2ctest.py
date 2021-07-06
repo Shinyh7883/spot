@@ -39,8 +39,6 @@ if __name__ == '__main__':
         # new angle to be written on selected motor
         angle=int(input("Enter new angles (0-180): "))
         prev_angle = val_list[num]
-        
-        # increase(decrease) prev_angle to angle by 1 degree
         sweep = range(prev_angle, angle, 1) if (prev_angle < angle) else range(prev_angle, angle, -1)
         for degree in sweep:
             kit[0].servo[num].angle=degree
