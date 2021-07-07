@@ -23,11 +23,11 @@ if __name__ == '__main__':
 
     time.sleep(1)
 
-    stand = kinematics.leg_IK([-90, 20, 100]) 
-    up_in = kinematics.leg_IK([-110, 0, 110])
-    up_out = kinematics.leg_IK([-110, 25, 110])  
-    down = kinematics.leg_IK([-100, 20, 90])
-    walk = kinematics.leg_IK([-100, 20, 80]) 
+    stand = kinematics.leg_IK([-20, 20, 100]) 
+    up_in = kinematics.leg_IK([-50, 0, 110])
+    up_out = kinematics.leg_IK([-50, 25, 110])  
+    down = kinematics.leg_IK([-20, 20, 90])
+    walk = kinematics.leg_IK([-20, 20, 80]) 
 
     while (1):
         leg.back_L(down)

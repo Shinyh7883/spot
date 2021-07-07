@@ -15,20 +15,20 @@ kit.append(ServoKit(channels=16, i2c=i2c_bus0, address=0x40))
 
 if __name__ == '__main__':
     while (1):
-        location=[-90, 26, 100]
+        location=[0, 50, 100]
         theta = kinematics.leg_IK(location)
         leg.front_R(theta)
         leg.front_L(theta)
         leg.back_R(theta)
         leg.back_L(theta)
 
-        time.sleep(1)
+        time.sleep(2)
 
-        location=[-110, 26, 100]
+        location=[0, 26, 80]
         theta = kinematics.leg_IK(location)
         leg.front_R(theta)
         leg.front_L(theta)
         leg.back_R(theta)
         leg.back_L(theta)
 
-        time.sleep(1)
+        time.sleep(2)

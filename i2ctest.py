@@ -1,31 +1,21 @@
-# SDA = pin.SDA_1
-# SCL = pin.SCL_1
-# SDA_1 = pin.SDA
-# SCL_1 = pin.SCL
 
 from adafruit_servokit import ServoKit
 import board
 import busio
 import time
 
-# On the Jetson Nano
-# Bus 0 (pins 28,27) is board SCL_1, SDA_1 in the jetson board definition file
-# Bus 1 (pins 5, 3) is board SCL, SDA in the jetson definition file
-# Default is to Bus 1; We are using Bus 0, so we need to construct the busio first ...
 print("Initializing Servos")
 i2c_bus0=(busio.I2C(board.SCL_1, board.SDA_1))
 print("Initializing ServoKit")
 
 kit = list()
 kit.append(ServoKit(channels=16, i2c=i2c_bus0, address=0x40))
-# kit.append(ServoKit(channels=16, i2c=i2c_bus0, address=0x41)) 
 
-# kit[0] is the front servos
-# kit[1] is the rear servos
 print("Done initializing")
 
-# [0]~[2] : FL // [3]~[5] : FR // [6]~[8] : RL // [9]~[11] : RR
 val_list = [60, 60, 120, 120, 20, 20, 160, 160, 90, 90, 90, 90]
+for i in range(len(val_list)):
+            kit[0].servo[i].set_pulse_width_range(500,2500)
 
 if __name__ == '__main__':
     for x in range(len(val_list)):

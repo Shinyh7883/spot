@@ -9,14 +9,11 @@ class leg:
     i2c_bus0=(busio.I2C(board.SCL_1, board.SDA_1))
     kit = list()
     kit.append(ServoKit(channels=16, i2c=i2c_bus0, address=0x40))
-    kit[-1].frequency = 330 #주파수 설정
     val_list = [60, 60, 60, 60, 20, 20, 20, 20, 90, 90, 90, 90]
-    
-    servos = list()
-    for i in range(len(val_list)):
-        servos.append(servo.Servo(kit[0].channels[i], min_pulse=100, max_pulse=200))
-    
-    
+
+    def __init__(self):
+        for i in range(len(self.val_list)):
+            self.kit[0].servo[i].set_pulse_width_range(500,2500) #실험값
     
     def front_R(self, theta):
         num=[10, 6, 2]
@@ -55,7 +52,7 @@ class kinematics:
         #################
         x = location[0]
         y = location[1]
-        z = location[2] 
+        z = location[2]
 
         t1 = np.deg2rad(t1)
         t2 = np.deg2rad(t2)
