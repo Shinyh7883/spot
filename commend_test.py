@@ -11,10 +11,9 @@ control.commend_set(commend)
 control.commend(commend, "front_R", dot2, "direct")
 control.commend(commend, "back_R", dot3, "direct")
 control.commend_run(commend)
-print(commend)
+
 
 control.commend_set(commend)
 control.commend(commend, "front_R", dot3, "direct")
 control.commend(commend, "back_R", dot1, "direct")
 control.commend_run(commend)
-print(commend)
