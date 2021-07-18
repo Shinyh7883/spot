@@ -39,51 +39,48 @@ class functions:
     def trajectory(self, dot1, dot2):
         pass
 
-    def move(self, leg, theta):
-        i2c_bus0=(busio.I2C(board.SCL_1, board.SDA_1))
-        kit = list()
-        kit.append(ServoKit(channels=16, i2c=i2c_bus0, address=0x40))
+    def move(self, theta): #다리별 각도값 입력
+        # i2c_bus0=(busio.I2C(board.SCL_1, board.SDA_1))
+        # kit = list()
+        # kit.append(ServoKit(channels=16, i2c=i2c_bus0, address=0x40))
 
-        if leg == 'front_R':
-            num=[10, 6, 2]
-            self.kit[0].servo[num[0]].angle=theta[0]
-            self.kit[0].servo[num[1]].angle=(180 - theta[1])
-            self.kit[0].servo[num[2]].angle=(180 - theta[2])
+        theta1 = theta[0] #'front_R'
+        theta2 = theta[1] #'front_L'
+        theta3 = theta[2] #'back_R'
+        theta4 = theta[3] #'back_L'
 
-        if leg == 'front_L':
-            num=[8, 4, 0]
-            self.kit[0].servo[num[0]].angle=(180 - theta[0])
-            self.kit[0].servo[num[1]].angle=theta[1]
-            self.kit[0].servo[num[2]].angle=theta[2]
+        # leg == 'front_R'
+        num=[10, 6, 2]
+        self.kit[0].servo[num[0]].angle=theta1[0]
+        self.kit[0].servo[num[1]].angle=(180 - theta1[1])
+        self.kit[0].servo[num[2]].angle=(180 - theta1[2])
 
-        if leg == 'back_R':
-            num=[11, 7, 3]
-            self.kit[0].servo[num[0]].angle=theta[0]
-            self.kit[0].servo[num[1]].angle=(180 - theta[1])
-            self.kit[0].servo[num[2]].angle=(180 - theta[2])
+        # leg == 'front_L'
+        num=[8, 4, 0]
+        self.kit[0].servo[num[0]].angle=(180 - theta2[0])
+        self.kit[0].servo[num[1]].angle=theta2[1]
+        self.kit[0].servo[num[2]].angle=theta2[2]
 
-        if leg == 'back_L':
-            num=[9, 5, 1]
-            self.kit[0].servo[num[0]].angle=(180 - theta[0])
-            self.kit[0].servo[num[1]].angle=theta[1]
-            self.kit[0].servo[num[2]].angle=theta[2]
+        # leg == 'back_R'
+        num=[11, 7, 3]
+        self.kit[0].servo[num[0]].angle=theta3[0]
+        self.kit[0].servo[num[1]].angle=(180 - theta3[1])
+        self.kit[0].servo[num[2]].angle=(180 - theta3[2])
 
-        else:
-            pass
+        # leg == 'back_L'
+        num=[9, 5, 1]
+        self.kit[0].servo[num[0]].angle=(180 - theta4[0])
+        self.kit[0].servo[num[1]].angle=theta4[1]
+        self.kit[0].servo[num[2]].angle=theta4[2]
 
+    
 class control():
-    def commend(self, commend, leg, dot1, dot2, type):
-        if leg == "front_R":
-            leg = 1
-        elif leg == "front_L":
-            leg = 2
-        elif leg == "back_R":
-            leg = 3
-        elif leg == "back_L":
-            leg = 4
-        else:
-            print("다리를 잘못 입력했어용")
 
+    def commend_set(self, commend):
+        for i in range(4):
+            commend[i][0] = commend[i][1] #이동 완료한 상태로 전환
+
+    def commend(self, commend, leg, dot, type): #현 위치에서 이동할 점 입력
         if type == "linear":
             type = 1
         elif type == "direct":
@@ -91,54 +88,97 @@ class control():
         else:
             print("방법을 잘못 입력했어용")
 
-        # commend = np.zeros(1,3) # 실행파일 앞부분에 넣기!!
-        commend = np.append(commend, [leg, dot1, dot2, type], axis = 0)
-        print(commend)
+        if leg == "front_R":
+            commend[0][1] = dot
+            commend[0][2] = type
+        elif leg == "front_L":
+            commend[1][1] = dot
+            commend[1][2] = type
+        elif leg == "back_R":
+            commend[2][1] = dot
+            commend[2][2] = type
+        elif leg == "back_L":
+            commend[3][1] = dot
+            commend[3][2] = type
+        else:
+            print("다리를 잘못 입력했어용")
+
         return commend
 
-        # commend= np.delete(commend, [0, 0], axis = 0) #실행파일 뒷부분에 넣기!!
 
-    def commend_perform(self, commend):
-        len_commend = np.shape(commend)[0]
-        if len_commend == 1:
-            leg1 = commend[0][0]
-            if len_commend == 2:
-                leg2 = commend[1][0]
-                if len_commend == 3:
-                    leg3 = commend[2][0]
-                    if len_commend == 4:
-                        leg4 = commend[3][0]
-                else:
-                    pass #이거 수정해야함
+    def commend_run(self, commend):
+        dt = 1000 # 1000은 가변
+        if commend[0][2] == 1:
+            theta1 = control.linear(self, commend[0])
+        elif commend[0][2] == 2:
+            theta1 = control.direct(self, commend[0], dt + 10)
+        if commend[1][2] == 1:
+            theta2 = control.linear(self, commend[1])
+        elif commend[1][2] == 2:
+            theta2 = control.direct(self, commend[1], dt) 
+        if commend[2][2] == 1:
+            theta3 = control.linear(self, commend[2])
+        elif commend[2][2] == 2:
+            theta3 = control.direct(self, commend[2], dt)
+        if commend[3][2] == 1:
+            theta4 = control.linear(self, commend[3])
+        elif commend[3][2] == 2:
+            theta4 = control.direct(self, commend[3], dt)
+
+        theta_run = np.empty((4,1))
+        len_theta = (len(theta1), len(theta2), len(theta3), len(theta4))
+
+        max_len = dt
+        for num in len_theta:
+            if (max_len is None or num > max_len):
+                max_len = num
+        print(max_len)
+        print(len_theta)
+        theta1 = control.array_len_equalization(self, theta1, max_len)
+        theta2 = control.array_len_equalization(self, theta2, max_len)
+        theta3 = control.array_len_equalization(self, theta3, max_len)
+        theta4 = control.array_len_equalization(self, theta4, max_len)
+
+        for i in range(max_len):
+            theta_run = (theta1[i], theta2[i], theta3[i], theta4[i])
+            functions.move(self, theta_run)
+
+    def array_len_equalization(self, theta, max_len): # 제일 긴 행렬에 맞추어 마지막값 복사
+        if (len(theta < max_len)):
+            for i in range(max_len - len(theta)):
+                theta = np.append(theta, [theta[len(theta) - 1]], axis = 0)
+
+        return theta
 
 
-
-        
 
     def linear(self, commend):
-        dot1 = commend[1]
-        dot2 = commend[2]
+        dot1 = commend[0]
+        dot2 = commend[1]
         dots = functions.trajectory(dot1, dot2)
 
         theta = np.zeros[1, 3]
         for i in range(np.shape(dots)[0]): #0 아님 1 이다
-            theta = np.append(theta, functions.leg_IK(dots[i]), axis = 0)
+            theta = np.append(theta, functions.leg_IK(self, dots[i]), axis = 0)
         theta = np.delete(theta, [0, 0], axis = 0)
 
         return theta
 
     def direct(self, commend, dt):
-        theta1 = functions.leg_IK(self, commend[1])
-        theta2 = functions.leg_IK(self, commend[2])
+        theta1 = functions.leg_IK(self, commend[0])
+        theta2 = functions.leg_IK(self, commend[1])
 
         theta_x = np.linspace(theta1[0], theta2[0], dt)
         theta_y = np.linspace(theta1[1], theta2[1], dt)
         theta_z = np.linspace(theta1[2], theta2[2], dt)
 
-        theta = np.zeros[1, 3]
+        theta = np.empty((1,3))
         for i in range(len(theta_x)):
-            theta = np.append(theta, [theta_x, theta_y, theta_z], axis = 0)
+            dtheta = np.array([[theta_x[i], theta_y[i], theta_z[i]]])
+            theta = np.append(theta, dtheta, axis = 0)
         theta = np.delete(theta, [0,0], axis = 0)
+
+        print(theta)
 
         return theta
 
