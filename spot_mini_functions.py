@@ -154,7 +154,7 @@ class control(functions):
 
 
 
-    def linear(self, commend):
+    def linear(self, commend):  #속도 입력 해서 거리를 나누어 구간 갯수 정하자
         dot1 = commend[0]
         dot2 = commend[1]
         dot_x = np.linspace(dot1[0], dot2[0], 100)
@@ -189,7 +189,7 @@ class control(functions):
 class motion(functions):
         
 
-    def foward(self):
+    def foward(self): #한 다리 드는 알고리즘 부터 구상하도록 하자
         dot1 = [-90, 15, 90]
         dot2 = [-60, 15, 80]
         dot3 = [-95, 15, 100]
