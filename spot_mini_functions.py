@@ -4,6 +4,9 @@ from adafruit_servokit import ServoKit
 import board
 import busio
 import time
+i2c_bus0=(busio.I2C(board.SCL_1, board.SDA_1))
+kit = list()
+kit.append(ServoKit(channels=16, i2c=i2c_bus0, address=0x40))
 
 class functions:
     def leg_IK(self, location):
@@ -32,53 +35,51 @@ class functions:
         theta2 = math.acos((l2**2 + H**2 - l3**2)/(2* l2 * H)) + math.atan2(x, G) - t2
         theta3 = math.acos((l2**2 + l3**2 - H**2)/(2 * l2 * l3)) - t3
         theta = [np.rad2deg(theta1), np.rad2deg(theta2), np.rad2deg(theta3)]
-        print(theta)
 
         return theta
 
-    def trajectory(self, dot1, dot2):
-        pass
 
-    def move(self, theta): #다리별 각도값 입력
-        # i2c_bus0=(busio.I2C(board.SCL_1, board.SDA_1))
-        # kit = list()
-        # kit.append(ServoKit(channels=16, i2c=i2c_bus0, address=0x40))
+    def move(self, theta, max_len): #다리별 각도값 입력
+        
+        for i in range(max_len):
+            theta1 = theta[0][i] #'front_R'
+            theta2 = theta[1][i] #'front_L'
+            theta3 = theta[2][i] #'back_R'
+            theta4 = theta[3][i] #'back_L'
 
-        theta1 = theta[0] #'front_R'
-        theta2 = theta[1] #'front_L'
-        theta3 = theta[2] #'back_R'
-        theta4 = theta[3] #'back_L'
+            # leg == 'front_R'
+            print(theta1[0])
+            num=[10, 6, 2]
+            kit[0].servo[num[0]].angle=theta1[0]
+            kit[0].servo[num[1]].angle=(180 - theta1[1])
+            kit[0].servo[num[2]].angle=(180 - theta1[2])
 
-        # leg == 'front_R'
-        num=[10, 6, 2]
-        self.kit[0].servo[num[0]].angle=theta1[0]
-        self.kit[0].servo[num[1]].angle=(180 - theta1[1])
-        self.kit[0].servo[num[2]].angle=(180 - theta1[2])
+            # leg == 'front_L'
+            num=[8, 4, 0]
+            kit[0].servo[num[0]].angle=(180 - theta2[0])
+            kit[0].servo[num[1]].angle=theta2[1]
+            kit[0].servo[num[2]].angle=theta2[2]
 
-        # leg == 'front_L'
-        num=[8, 4, 0]
-        self.kit[0].servo[num[0]].angle=(180 - theta2[0])
-        self.kit[0].servo[num[1]].angle=theta2[1]
-        self.kit[0].servo[num[2]].angle=theta2[2]
+            # leg == 'back_R'
+            num=[11, 7, 3]
+            kit[0].servo[num[0]].angle=theta3[0]
+            kit[0].servo[num[1]].angle=(180 - theta3[1])
+            kit[0].servo[num[2]].angle=(180 - theta3[2])
 
-        # leg == 'back_R'
-        num=[11, 7, 3]
-        self.kit[0].servo[num[0]].angle=theta3[0]
-        self.kit[0].servo[num[1]].angle=(180 - theta3[1])
-        self.kit[0].servo[num[2]].angle=(180 - theta3[2])
+            # leg == 'back_L'
+            num=[9, 5, 1]
+            kit[0].servo[num[0]].angle=(180 - theta4[0])
+            kit[0].servo[num[1]].angle=theta4[1]
+            kit[0].servo[num[2]].angle=theta4[2]
 
-        # leg == 'back_L'
-        num=[9, 5, 1]
-        self.kit[0].servo[num[0]].angle=(180 - theta4[0])
-        self.kit[0].servo[num[1]].angle=theta4[1]
-        self.kit[0].servo[num[2]].angle=theta4[2]
+            time.sleep(0.0001)
 
     
-class control():
-
+class control(functions):
     def commend_set(self, commend):
         for i in range(4):
             commend[i][0] = commend[i][1] #이동 완료한 상태로 전환
+        print("set")
 
     def commend(self, commend, leg, dot, type): #현 위치에서 이동할 점 입력
         if type == "linear":
@@ -107,11 +108,11 @@ class control():
 
 
     def commend_run(self, commend):
-        dt = 1000 # 1000은 가변
+        dt = 100 # 1000은 가변
         if commend[0][2] == 1:
             theta1 = control.linear(self, commend[0])
         elif commend[0][2] == 2:
-            theta1 = control.direct(self, commend[0], dt + 10)
+            theta1 = control.direct(self, commend[0], dt)
         if commend[1][2] == 1:
             theta2 = control.linear(self, commend[1])
         elif commend[1][2] == 2:
@@ -138,15 +139,16 @@ class control():
         theta2 = control.array_len_equalization(self, theta2, max_len)
         theta3 = control.array_len_equalization(self, theta3, max_len)
         theta4 = control.array_len_equalization(self, theta4, max_len)
-
-        for i in range(max_len):
-            theta_run = (theta1[i], theta2[i], theta3[i], theta4[i])
-            functions.move(self, theta_run)
+        print("len_equalization")
+        theta_run = [theta1, theta2, theta3, theta4]
+        self.move(theta_run, max_len)
+       
 
     def array_len_equalization(self, theta, max_len): # 제일 긴 행렬에 맞추어 마지막값 복사
         if (len(theta < max_len)):
             for i in range(max_len - len(theta)):
                 theta = np.append(theta, [theta[len(theta) - 1]], axis = 0)
+        print("theta 생성 완료")
 
         return theta
 
@@ -155,11 +157,13 @@ class control():
     def linear(self, commend):
         dot1 = commend[0]
         dot2 = commend[1]
-        dots = functions.trajectory(dot1, dot2)
+        dot_x = np.linspace(dot1[0], dot2[0], 100)
+        dot_y = np.linspace(dot1[1], dot2[1], 100)
+        dot_z = np.linspace(dot1[2], dot2[2], 100)
 
-        theta = np.zeros[1, 3]
-        for i in range(np.shape(dots)[0]): #0 아님 1 이다
-            theta = np.append(theta, functions.leg_IK(self, dots[i]), axis = 0)
+        theta = np.empty((1, 3))
+        for i in range(np.shape(dot_x)[0]): #0 아님 1 이다
+            theta = np.append(theta, [functions.leg_IK(self, [dot_x[i], dot_y[i], dot_z[i]])], axis = 0)
         theta = np.delete(theta, [0, 0], axis = 0)
 
         return theta
@@ -182,9 +186,78 @@ class control():
 
         return theta
 
-class motion:
+class motion(functions):
+        
+
     def foward(self):
-        pass
+        dot1 = [-90, 15, 90]
+        dot2 = [-60, 15, 80]
+        dot3 = [-95, 15, 100]
+        dot4 = [-110, 15, 120]
+        dot5 = [-40, 15, 90]
+
+        commend = [[dot1, dot1, 2],[dot1, dot1, 2],[dot1, dot1, 2],[dot1, dot1, 2]]
+
+        control.commend_set(self,commend)
+        control.commend(self, commend, "front_R", dot1, "linear")
+        control.commend(self, commend, "back_L", dot1, "linear")
+        control.commend(self, commend, "back_R", dot1, "linear")
+        control.commend(self, commend, "front_L", dot1, "linear")
+        control.commend_run(self, commend)
+
+
+        control.commend_set(self,commend)
+        control.commend(self, commend, "front_R",  dot3, "direct")
+        control.commend(self, commend, "back_L", dot2, "direct")
+        control.commend(self, commend, "front_L",  dot3, "direct")
+        control.commend(self, commend, "back_R", dot3, "direct")
+        control.commend_run(self, commend)
+
+        control.commend_set(self, commend)
+        control.commend(self, commend, "front_R", dot4, "linear")
+        control.commend(self, commend, "front_L",  dot3, "direct")
+        control.commend(self, commend, "back_R", dot3, "direct")
+        control.commend_run(self, commend)
+
+        control.commend_set(self, commend)
+        control.commend(self, commend, "front_R", dot1, "linear")
+        control.commend(self, commend, "back_L", dot5, "linear")
+        control.commend(self, commend, "back_R", dot5, "linear")
+        control.commend(self, commend, "front_L", dot5, "linear")
+        control.commend_run(self, commend)
+
+        control.commend_set(self, commend)
+        control.commend(self, commend, "front_R", [-90, 15, 80], "linear")
+        control.commend(self, commend, "back_L", [-110, 15, 100], "linear")
+        control.commend_run(self, commend)
+
+
+        control.commend_set(self,commend)
+        control.commend(self, commend, "front_L",  dot4, "direct")
+        control.commend_run(self, commend)
+
+
+        control.commend_set(self, commend)
+        control.commend(self, commend, "back_R", dot4, "linear")
+        control.commend(self, commend, "front_L", dot2, "direct")
+        control.commend(self, commend, "back_L", dot3, "direct")
+        control.commend_run(self, commend)
+
+        control.commend_set(self, commend)
+        control.commend(self, commend, "back_R", dot3, "direct")
+        control.commend_run(self, commend)
+
+        control.commend_set(self, commend)
+        control.commend(self, commend, "back_R", dot5, "linear")
+        control.commend_run(self, commend)
+
+        control.commend_set(self,commend)
+        control.commend(self, commend, "front_R", dot1, "linear")
+        control.commend(self, commend, "back_L", dot1, "linear")
+        control.commend(self, commend, "back_R", dot1, "linear")
+        control.commend(self, commend, "front_L", dot1, "linear")
+        control.commend_run(self, commend)
+
     def backward(self):
         pass
     def left(self):

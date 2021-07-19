@@ -1,19 +1,27 @@
 from spot_mini_functions import *
 import numpy as np
 control = control()
-dot1 = [-20, 20, 100]
-dot2 = [-50, 0, 110]
-dot3 = [-50, 25, 110]
+functions = functions()
+dot1 = [-50, 15, 140]
+dot2 = [-50, 15, 80]
+dot3 = [-50, 0, 140]
+
 
 commend = [[dot1, dot1, 2],[dot1, dot1, 2],[dot1, dot1, 2],[dot1, dot1, 2]]
 
-control.commend_set(commend)
-control.commend(commend, "front_R", dot2, "direct")
-control.commend(commend, "back_R", dot3, "direct")
-control.commend_run(commend)
 
+while 1:
 
-control.commend_set(commend)
-control.commend(commend, "front_R", dot3, "direct")
-control.commend(commend, "back_R", dot1, "direct")
-control.commend_run(commend)
+    control.commend_set(commend)
+    control.commend(commend, "front_R", dot2, "direct")
+    control.commend(commend, "back_R", dot1, "direct")
+    control.commend(commend, "front_L", dot2, "direct")
+    control.commend(commend, "back_L", dot1, "direct")
+    control.commend_run(commend)
+
+    control.commend_set(commend)
+    control.commend(commend, "front_R", dot1, "direct")
+    control.commend(commend, "back_R", dot2, "direct")
+    control.commend(commend, "front_L", dot1, "direct")
+    control.commend(commend, "back_L", dot2, "direct")
+    control.commend_run(commend)
