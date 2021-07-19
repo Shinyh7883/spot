@@ -181,9 +181,7 @@ class control(functions):
             dtheta = np.array([[theta_x[i], theta_y[i], theta_z[i]]])
             theta = np.append(theta, dtheta, axis = 0)
         theta = np.delete(theta, [0,0], axis = 0)
-
-        print(theta)
-
+        
         return theta
 
 class motion(functions):
