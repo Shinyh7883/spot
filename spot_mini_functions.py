@@ -187,8 +187,6 @@ class control(functions):
         return theta
 
 class motion(functions):
-        
-
     def foward(self): #한 다리 드는 알고리즘 부터 구상하도록 하자
         dot1 = [-90, 15, 90]
         dot2 = [-60, 15, 80]
