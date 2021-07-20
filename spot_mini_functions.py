@@ -157,6 +157,10 @@ class control(functions):
     def linear(self, commend):  #속도 입력 해서 거리를 나누어 구간 갯수 정하자
         dot1 = commend[0]
         dot2 = commend[1]
+
+        [theta1_X, theta1_y, theta1_z] = functions.leg_IK(dot1)
+        [theta2_x, theta2_y, theta2_z] = functions.leg_IK(dot2)
+
         dot_x = np.linspace(dot1[0], dot2[0], 100)
         dot_y = np.linspace(dot1[1], dot2[1], 100)
         dot_z = np.linspace(dot1[2], dot2[2], 100)
