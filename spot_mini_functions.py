@@ -7,6 +7,10 @@ import time
 i2c_bus0=(busio.I2C(board.SCL_1, board.SDA_1))
 kit = list()
 kit.append(ServoKit(channels=16, i2c=i2c_bus0, address=0x40))
+for i in range(12):
+        kit[0].servo[i].set_pulse_width_range(500,2500)
+
+dt = 0.0001 #각 구간 이동하는데 걸리는 시간
 
 class functions:
     def leg_IK(self, location):
@@ -72,7 +76,7 @@ class functions:
             kit[0].servo[num[1]].angle=theta4[1]
             kit[0].servo[num[2]].angle=theta4[2]
 
-            time.sleep(0.0001)
+            time.sleep(dt)
 
     
 class control(functions):
@@ -87,7 +91,7 @@ class control(functions):
         elif type == "direct":
             type = 2
         else:
-            print("방법을 잘못 입력했어용")
+            print("잘못 입력했어용")
 
         if leg == "front_R":
             commend[0][1] = dot
@@ -101,30 +105,27 @@ class control(functions):
         elif leg == "back_L":
             commend[3][1] = dot
             commend[3][2] = type
-        else:
-            print("다리를 잘못 입력했어용")
 
         return commend
 
 
-    def commend_run(self, commend):
-        dt = 100 # 1000은 가변
+    def commend_run(self, commend, vel):
         if commend[0][2] == 1:
-            theta1 = control.linear(self, commend[0])
+            theta1 = control.linear(self, commend[0],vel)
         elif commend[0][2] == 2:
-            theta1 = control.direct(self, commend[0], dt)
+            theta1 = control.direct(self, commend[0], vel)
         if commend[1][2] == 1:
-            theta2 = control.linear(self, commend[1])
+            theta2 = control.linear(self, commend[1], vel)
         elif commend[1][2] == 2:
-            theta2 = control.direct(self, commend[1], dt) 
+            theta2 = control.direct(self, commend[1], vel) 
         if commend[2][2] == 1:
-            theta3 = control.linear(self, commend[2])
+            theta3 = control.linear(self, commend[2], vel)
         elif commend[2][2] == 2:
-            theta3 = control.direct(self, commend[2], dt)
+            theta3 = control.direct(self, commend[2], vel)
         if commend[3][2] == 1:
-            theta4 = control.linear(self, commend[3])
+            theta4 = control.linear(self, commend[3], vel)
         elif commend[3][2] == 2:
-            theta4 = control.direct(self, commend[3], dt)
+            theta4 = control.direct(self, commend[3], vel)
 
         theta_run = np.empty((4,1))
         len_theta = (len(theta1), len(theta2), len(theta3), len(theta4))
@@ -154,16 +155,22 @@ class control(functions):
 
 
 
-    def linear(self, commend):  #속도 입력 해서 거리를 나누어 구간 갯수 정하자
+    def linear(self, commend, vel):  #속도 입력 해서 거리를 나누어 구간 갯수 정하자
         dot1 = commend[0]
         dot2 = commend[1]
 
-        [theta1_X, theta1_y, theta1_z] = functions.leg_IK(dot1)
-        [theta2_x, theta2_y, theta2_z] = functions.leg_IK(dot2)
+        [theta1_x, theta1_y, theta1_z] = functions.leg_IK(self, commend[0])
+        [theta2_x, theta2_y, theta2_z] = functions.leg_IK(self, commend[1])
 
-        dot_x = np.linspace(dot1[0], dot2[0], 100)
-        dot_y = np.linspace(dot1[1], dot2[1], 100)
-        dot_z = np.linspace(dot1[2], dot2[2], 100)
+        dtheta = [abs(theta1_x - theta2_x), abs(theta1_y - theta2_y), abs(theta1_z - theta2_z)] #최대 각 변위 계산하여 구간 개수 정하기
+        for num in dtheta:
+            if (max_dtheta is None or num > max_dtheta):
+                max_dtheta = num
+
+        n = int(dtheta/(vel*dt))
+        dot_x = np.linspace(dot1[0], dot2[0], n)
+        dot_y = np.linspace(dot1[1], dot2[1], n)
+        dot_z = np.linspace(dot1[2], dot2[2], n)
 
         theta = np.empty((1, 3))
         for i in range(np.shape(dot_x)[0]): #0 아님 1 이다
@@ -172,13 +179,23 @@ class control(functions):
 
         return theta
 
-    def direct(self, commend, dt):
+    def direct(self, commend, vel): #vel_max = 350deg/sec
         theta1 = functions.leg_IK(self, commend[0])
         theta2 = functions.leg_IK(self, commend[1])
 
-        theta_x = np.linspace(theta1[0], theta2[0], dt)
-        theta_y = np.linspace(theta1[1], theta2[1], dt)
-        theta_z = np.linspace(theta1[2], theta2[2], dt)
+        [theta1_x, theta1_y, theta1_z] = theta1
+        [theta2_x, theta2_y, theta2_z] = theta2
+
+        dtheta = [abs(theta1_x - theta2_x), abs(theta1_y - theta2_y), abs(theta1_z - theta2_z)] #최대 각 변위 계산하여 구간 개수 정하기
+        for num in dtheta:
+            if (max_dtheta is None or num > max_dtheta):
+                max_dtheta = num
+
+        n = int(dtheta/(vel*dt))
+
+        theta_x = np.linspace(theta1[0], theta2[0], n)
+        theta_y = np.linspace(theta1[1], theta2[1], n)
+        theta_z = np.linspace(theta1[2], theta2[2], n)
 
         theta = np.empty((1,3))
         for i in range(len(theta_x)):
@@ -189,7 +206,7 @@ class control(functions):
         return theta
 
 class motion(functions):
-    def foward(self): #한 다리 드는 알고리즘 부터 구상하도록 하자
+    def foward(self): #캘리브레이션 -> 걷는 알고리즘 수작업으로 만들기
         dot1 = [-90, 15, 90]
         dot2 = [-60, 15, 80]
         dot3 = [-95, 15, 100]
