@@ -13,7 +13,7 @@ kit.append(ServoKit(channels=16, i2c=i2c_bus0, address=0x40))
 
 print("Done initializing")
 
-val_list = [60, 60, 120, 120, 20, 20, 160, 160, 90, 90, 90, 90]
+val_list = [0, 0, 150, 150, 0, 0, 180, 180, 90, 90, 90, 90]
 for i in range(len(val_list)):
             kit[0].servo[i].set_pulse_width_range(500,2500)
 

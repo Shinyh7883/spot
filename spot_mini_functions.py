@@ -10,7 +10,7 @@ kit.append(ServoKit(channels=16, i2c=i2c_bus0, address=0x40))
 for i in range(12):
         kit[0].servo[i].set_pulse_width_range(500,2500)
 
-dt = 0.0001 #각 구간 이동하는데 걸리는 시간
+dt = 0.001 #각 구간 이동하는데 걸리는 시간
 
 class functions:
     def leg_IK(self, location):
@@ -19,7 +19,7 @@ class functions:
         l2 = 105
         l3 = 120
         t1 = 80
-        t2 = 0
+        t2 = -90
         t3 = 10
         #################
         x = location[0]
@@ -56,13 +56,13 @@ class functions:
             num=[10, 6, 2]
             kit[0].servo[num[0]].angle=theta1[0]
             kit[0].servo[num[1]].angle=(180 - theta1[1])
-            kit[0].servo[num[2]].angle=(180 - theta1[2])
+            kit[0].servo[num[2]].angle=(180 - theta1[2]) + 30
 
             # leg == 'front_L'
             num=[8, 4, 0]
             kit[0].servo[num[0]].angle=(180 - theta2[0])
             kit[0].servo[num[1]].angle=theta2[1]
-            kit[0].servo[num[2]].angle=theta2[2]
+            kit[0].servo[num[2]].angle=theta2[2] -30
 
             # leg == 'back_R'
             num=[11, 7, 3]
@@ -219,73 +219,107 @@ class control(functions):
 
 class motion(functions):
     def foward(self): #캘리브레이션 -> 걷는 알고리즘 수작업으로 만들기
-        dot1 = [-90, 15, 90]
-        dot2 = [-60, 15, 80]
-        dot3 = [-95, 15, 100]
-        dot4 = [-110, 15, 120]
-        dot5 = [-40, 15, 90]
+        dot1 = [0, 25, 120]
+        dot2 = [30, 25, 100]
+        dot3 = [0, 25, 130]
+        dot4 = [-30, 25, 150]
+        dot5 = [50, 25, 120]
 
-        commend = [[dot1, dot2, 2],[dot1, dot2, 2],[dot1, dot2, 2],[dot1, dot2, 2]]
+        commend = [[dot1, dot1, 2],[dot1, dot1, 2],[dot1, dot1, 2],[dot1, dot1, 2]]
+
+        walksp = 400
+
+        control.commend_set(self,commend)
+        control.commend(self, commend, "back_L", [20, 25, 90], "linear")
+        control.commend(self, commend, "front_R", [20, 25, 130], "linear")
+        control.commend_run(self, commend, walksp)
+
+        control.commend_set(self,commend)
+        control.commend(self, commend, "front_R", [0, 25, 90], "direct")
+        control.commend_run(self, commend, walksp)
+
+
+        control.commend_set(self,commend)
+        control.commend(self, commend, "front_R", [-30, 25, 130], "linear")
+        control.commend_run(self, commend, walksp)
 
         control.commend_set(self,commend)
         control.commend(self, commend, "front_R", dot1, "linear")
         control.commend(self, commend, "back_L", dot1, "linear")
         control.commend(self, commend, "back_R", dot1, "linear")
         control.commend(self, commend, "front_L", dot1, "linear")
-        control.commend_run(self, commend, 300)
+        control.commend_run(self, commend, 100)
+
+        print('오른앞발 이동완료')
+
+        control.commend_set(self,commend)
+        control.commend(self, commend, "front_R", [20, 25, 90], "linear")
+        control.commend(self, commend, "back_L", [20, 25, 130], "direct")
+        control.commend_run(self, commend, walksp)
+
+        control.commend_set(self,commend)
+        control.commend(self, commend, "back_L", [0, 25, 90], "linear")
+        control.commend_run(self, commend, walksp)
 
 
         control.commend_set(self,commend)
-        control.commend(self, commend, "front_R",  dot3, "direct")
-        control.commend(self, commend, "back_L", dot2, "direct")
-        control.commend(self, commend, "front_L",  dot3, "direct")
-        control.commend(self, commend, "back_R", dot3, "direct")
-        control.commend_run(self, commend, 300)
+        control.commend(self, commend, "back_L", [-30, 25, 130], "direct")
+        control.commend_run(self, commend, walksp)
 
-        control.commend_set(self, commend)
-        control.commend(self, commend, "front_R", dot4, "linear")
-        control.commend(self, commend, "front_L",  dot3, "direct")
-        control.commend(self, commend, "back_R", dot3, "direct")
-        control.commend_run(self, commend, 300)
-
-        control.commend_set(self, commend)
+        control.commend_set(self,commend)
         control.commend(self, commend, "front_R", dot1, "linear")
-        control.commend(self, commend, "back_L", dot5, "linear")
-        control.commend(self, commend, "back_R", dot5, "linear")
-        control.commend(self, commend, "front_L", dot5, "linear")
-        control.commend_run(self, commend, 300)
+        control.commend(self, commend, "back_L", dot1, "linear")
+        control.commend(self, commend, "back_R", dot1, "linear")
+        control.commend(self, commend, "front_L", dot1, "linear")
+        control.commend_run(self, commend, 100)
 
-        control.commend_set(self, commend)
-        control.commend(self, commend, "front_R", [-90, 15, 80], "linear")
-        control.commend(self, commend, "back_L", [-110, 15, 100], "linear")
-        control.commend_run(self, commend, 300)
+        print('왼뒷발 이동완료')
+
+        control.commend_set(self,commend)
+        control.commend(self, commend, "back_R", [20, 25, 90], "linear")
+        control.commend(self, commend, "back_L", [20, 25, 130], "direct")
+        control.commend_run(self, commend, walksp)
+
+        control.commend_set(self,commend)
+        control.commend(self, commend, "front_L", [0, 25, 90], "linear")
+        control.commend_run(self, commend, walksp)
 
 
-        # control.commend_set(self,commend)
-        # control.commend(self, commend, "front_L",  dot4, "direct")
-        # control.commend_run(self, commend)
+        control.commend_set(self,commend)
+        control.commend(self, commend, "front_L", [-30, 25, 130], "direct")
+        control.commend_run(self, commend, walksp)
+
+        control.commend_set(self,commend)
+        control.commend(self, commend, "front_R", dot1, "linear")
+        control.commend(self, commend, "back_L", dot1, "linear")
+        control.commend(self, commend, "back_R", dot1, "linear")
+        control.commend(self, commend, "front_L", dot1, "linear")
+        control.commend_run(self, commend, 100)
+
+        print('왼앞발 이동완료')
+
+        control.commend_set(self,commend)
+        control.commend(self, commend, "front_L", [20, 25, 90], "linear")
+        control.commend(self, commend, "back_R", [20, 25, 130], "direct")
+        control.commend_run(self, commend, walksp)
+
+        control.commend_set(self,commend)
+        control.commend(self, commend, "back_R", [0, 25, 90], "linear")
+        control.commend_run(self, commend, walksp)
 
 
-        # control.commend_set(self, commend)
-        # control.commend(self, commend, "back_R", dot4, "linear")
-        # control.commend(self, commend, "front_L", dot2, "direct")
-        # control.commend(self, commend, "back_L", dot3, "direct")
-        # control.commend_run(self, commend)
+        control.commend_set(self,commend)
+        control.commend(self, commend, "back_R", [-30, 25, 130], "direct")
+        control.commend_run(self, commend, walksp)
 
-        # control.commend_set(self, commend)
-        # control.commend(self, commend, "back_R", dot3, "direct")
-        # control.commend_run(self, commend)
+        control.commend_set(self,commend)
+        control.commend(self, commend, "front_R", dot1, "linear")
+        control.commend(self, commend, "back_L", dot1, "linear")
+        control.commend(self, commend, "back_R", dot1, "linear")
+        control.commend(self, commend, "front_L", dot1, "linear")
+        control.commend_run(self, commend, 100)
 
-        # control.commend_set(self, commend)
-        # control.commend(self, commend, "back_R", dot5, "linear")
-        # control.commend_run(self, commend)
-
-        # control.commend_set(self,commend)
-        # control.commend(self, commend, "front_R", dot1, "linear")
-        # control.commend(self, commend, "back_L", dot1, "linear")
-        # control.commend(self, commend, "back_R", dot1, "linear")
-        # control.commend(self, commend, "front_L", dot1, "linear")
-        # control.commend_run(self, commend)
+        print('오른뒷발 이동완료')
 
     def backward(self):
         pass

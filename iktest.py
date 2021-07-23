@@ -1,4 +1,4 @@
-from spot_functions import *
+from spot_mini_functions import *
 leg = leg()
 kinematics = kinematics()
 location=[0, 0, 100]
