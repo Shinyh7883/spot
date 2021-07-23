@@ -111,7 +111,7 @@ class control(functions):
 
     def commend_run(self, commend, vel):
         if commend[0][2] == 1:
-            theta1 = control.linear(self, commend[0],vel)
+            theta1 = control.linear(self, commend[0], vel)
         elif commend[0][2] == 2:
             theta1 = control.direct(self, commend[0], vel)
         if commend[1][2] == 1:
@@ -134,7 +134,7 @@ class control(functions):
         for num in len_theta:
             if (max_len is None or num > max_len):
                 max_len = num
-        print(max_len)
+        print("max_len :", max_len)
         print(len_theta)
         theta1 = control.array_len_equalization(self, theta1, max_len)
         theta2 = control.array_len_equalization(self, theta2, max_len)
@@ -150,6 +150,7 @@ class control(functions):
             for i in range(max_len - len(theta)):
                 theta = np.append(theta, [theta[len(theta) - 1]], axis = 0)
         print("theta 생성 완료")
+        print(theta)
 
         return theta
 
@@ -162,12 +163,18 @@ class control(functions):
         [theta1_x, theta1_y, theta1_z] = functions.leg_IK(self, commend[0])
         [theta2_x, theta2_y, theta2_z] = functions.leg_IK(self, commend[1])
 
+        print([theta1_x, theta1_y, theta1_z])
+
         dtheta = [abs(theta1_x - theta2_x), abs(theta1_y - theta2_y), abs(theta1_z - theta2_z)] #최대 각 변위 계산하여 구간 개수 정하기
+        max_dtheta = dtheta[0]
+        print(dtheta)
         for num in dtheta:
             if (max_dtheta is None or num > max_dtheta):
                 max_dtheta = num
 
-        n = int(dtheta/(vel*dt))
+        print(max_dtheta)
+        n = int(max_dtheta/(vel*dt)) + 1
+        print(n)
         dot_x = np.linspace(dot1[0], dot2[0], n)
         dot_y = np.linspace(dot1[1], dot2[1], n)
         dot_z = np.linspace(dot1[2], dot2[2], n)
@@ -187,11 +194,16 @@ class control(functions):
         [theta2_x, theta2_y, theta2_z] = theta2
 
         dtheta = [abs(theta1_x - theta2_x), abs(theta1_y - theta2_y), abs(theta1_z - theta2_z)] #최대 각 변위 계산하여 구간 개수 정하기
+        print(dtheta)
+        max_dtheta = dtheta[0]
         for num in dtheta:
             if (max_dtheta is None or num > max_dtheta):
                 max_dtheta = num
 
-        n = int(dtheta/(vel*dt))
+        print(max_dtheta)
+        n = int(max_dtheta/(vel*dt)) + 1
+
+        print(n)
 
         theta_x = np.linspace(theta1[0], theta2[0], n)
         theta_y = np.linspace(theta1[1], theta2[1], n)
@@ -213,14 +225,14 @@ class motion(functions):
         dot4 = [-110, 15, 120]
         dot5 = [-40, 15, 90]
 
-        commend = [[dot1, dot1, 2],[dot1, dot1, 2],[dot1, dot1, 2],[dot1, dot1, 2]]
+        commend = [[dot1, dot2, 2],[dot1, dot2, 2],[dot1, dot2, 2],[dot1, dot2, 2]]
 
         control.commend_set(self,commend)
         control.commend(self, commend, "front_R", dot1, "linear")
         control.commend(self, commend, "back_L", dot1, "linear")
         control.commend(self, commend, "back_R", dot1, "linear")
         control.commend(self, commend, "front_L", dot1, "linear")
-        control.commend_run(self, commend)
+        control.commend_run(self, commend, 300)
 
 
         control.commend_set(self,commend)
@@ -228,52 +240,52 @@ class motion(functions):
         control.commend(self, commend, "back_L", dot2, "direct")
         control.commend(self, commend, "front_L",  dot3, "direct")
         control.commend(self, commend, "back_R", dot3, "direct")
-        control.commend_run(self, commend)
+        control.commend_run(self, commend, 300)
 
         control.commend_set(self, commend)
         control.commend(self, commend, "front_R", dot4, "linear")
         control.commend(self, commend, "front_L",  dot3, "direct")
         control.commend(self, commend, "back_R", dot3, "direct")
-        control.commend_run(self, commend)
+        control.commend_run(self, commend, 300)
 
         control.commend_set(self, commend)
         control.commend(self, commend, "front_R", dot1, "linear")
         control.commend(self, commend, "back_L", dot5, "linear")
         control.commend(self, commend, "back_R", dot5, "linear")
         control.commend(self, commend, "front_L", dot5, "linear")
-        control.commend_run(self, commend)
+        control.commend_run(self, commend, 300)
 
         control.commend_set(self, commend)
         control.commend(self, commend, "front_R", [-90, 15, 80], "linear")
         control.commend(self, commend, "back_L", [-110, 15, 100], "linear")
-        control.commend_run(self, commend)
+        control.commend_run(self, commend, 300)
 
 
-        control.commend_set(self,commend)
-        control.commend(self, commend, "front_L",  dot4, "direct")
-        control.commend_run(self, commend)
+        # control.commend_set(self,commend)
+        # control.commend(self, commend, "front_L",  dot4, "direct")
+        # control.commend_run(self, commend)
 
 
-        control.commend_set(self, commend)
-        control.commend(self, commend, "back_R", dot4, "linear")
-        control.commend(self, commend, "front_L", dot2, "direct")
-        control.commend(self, commend, "back_L", dot3, "direct")
-        control.commend_run(self, commend)
+        # control.commend_set(self, commend)
+        # control.commend(self, commend, "back_R", dot4, "linear")
+        # control.commend(self, commend, "front_L", dot2, "direct")
+        # control.commend(self, commend, "back_L", dot3, "direct")
+        # control.commend_run(self, commend)
 
-        control.commend_set(self, commend)
-        control.commend(self, commend, "back_R", dot3, "direct")
-        control.commend_run(self, commend)
+        # control.commend_set(self, commend)
+        # control.commend(self, commend, "back_R", dot3, "direct")
+        # control.commend_run(self, commend)
 
-        control.commend_set(self, commend)
-        control.commend(self, commend, "back_R", dot5, "linear")
-        control.commend_run(self, commend)
+        # control.commend_set(self, commend)
+        # control.commend(self, commend, "back_R", dot5, "linear")
+        # control.commend_run(self, commend)
 
-        control.commend_set(self,commend)
-        control.commend(self, commend, "front_R", dot1, "linear")
-        control.commend(self, commend, "back_L", dot1, "linear")
-        control.commend(self, commend, "back_R", dot1, "linear")
-        control.commend(self, commend, "front_L", dot1, "linear")
-        control.commend_run(self, commend)
+        # control.commend_set(self,commend)
+        # control.commend(self, commend, "front_R", dot1, "linear")
+        # control.commend(self, commend, "back_L", dot1, "linear")
+        # control.commend(self, commend, "back_R", dot1, "linear")
+        # control.commend(self, commend, "front_L", dot1, "linear")
+        # control.commend_run(self, commend)
 
     def backward(self):
         pass
