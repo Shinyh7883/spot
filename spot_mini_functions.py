@@ -218,6 +218,12 @@ class control(functions):
         return theta
 
 class motion(functions):
+    def dot_move(self, axis, len, dot):
+        axis_dic = {'x' : 0, 'y' : 1, 'z' : 2}
+        axis = axis_dic[axis]
+        dot[axis] = dot[axis] + len
+        return dot
+
     def foward(self): #캘리브레이션 -> 걷는 알고리즘 수작업으로 만들기
         dot1 = [0, 25, 120]
         dot2 = [30, 25, 100]
