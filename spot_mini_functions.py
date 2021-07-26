@@ -8,7 +8,7 @@ i2c_bus0=(busio.I2C(board.SCL_1, board.SDA_1))
 kit = list()
 kit.append(ServoKit(channels=16, i2c=i2c_bus0, address=0x40))
 for i in range(12):
-        kit[0].servo[i].set_pulse_width_range(600,2500) #180도 돌음
+        kit[0].servo[i].set_pulse_width_range(550,2600) #180도 돌음
 
 dt = 0.001 #각 구간 이동하는데 걸리는 시간
 
@@ -52,31 +52,37 @@ class functions:
             theta4 = theta[3][i] #'back_L'
 
             # leg == 'front_R'
-            print(theta1[0])
             num=[10, 6, 2]
-            kit[0].servo[num[0]].angle=theta1[0]
+            kit[0].servo[num[0]].angle=theta1[0] - 7
             kit[0].servo[num[1]].angle=(180 - theta1[1])
-            kit[0].servo[num[2]].angle=(180 - theta1[2]) + 30
+            kit[0].servo[num[2]].angle=(180 - theta1[2]) + 15
 
             # leg == 'front_L'
             num=[8, 4, 0]
-            kit[0].servo[num[0]].angle=(180 - theta2[0])
-            kit[0].servo[num[1]].angle=theta2[1]
-            kit[0].servo[num[2]].angle=theta2[2] -30
+            kit[0].servo[num[0]].angle=theta2[0] - 5
+            kit[0].servo[num[1]].angle=theta2[1] + 10
+            kit[0].servo[num[2]].angle=theta2[2] - 27
 
             # leg == 'back_R'
             num=[11, 7, 3]
-            kit[0].servo[num[0]].angle=theta3[0]
+            kit[0].servo[num[0]].angle=theta3[0] - 10
             kit[0].servo[num[1]].angle=(180 - theta3[1])
-            kit[0].servo[num[2]].angle=(180 - theta3[2])
-
+            kit[0].servo[num[2]].angle=(180 - theta3[2]) 
+        
             # leg == 'back_L'
             num=[9, 5, 1]
-            kit[0].servo[num[0]].angle=(180 - theta4[0])
-            kit[0].servo[num[1]].angle=theta4[1]
-            kit[0].servo[num[2]].angle=theta4[2]
+            kit[0].servo[num[0]].angle=theta4[0] - 20
+            kit[0].servo[num[1]].angle=theta4[1] - 10
+            kit[0].servo[num[2]].angle=theta4[2] 
 
             time.sleep(dt)
+
+    def dot_move(self, axis, len, dott):
+        axis_dic = {'x' : 0, 'y' : 1, 'z' : 2}
+        axis = axis_dic[axis]
+        dot_move = [dott[0], dott[1], dott[2]]
+        dot_move[axis] = dot_move[axis] + len
+        return dot_move
 
     
 class control(functions):
@@ -135,7 +141,6 @@ class control(functions):
             if (max_len is None or num > max_len):
                 max_len = num
         print("max_len :", max_len)
-        print(len_theta)
         theta1 = control.array_len_equalization(self, theta1, max_len)
         theta2 = control.array_len_equalization(self, theta2, max_len)
         theta3 = control.array_len_equalization(self, theta3, max_len)
@@ -149,8 +154,6 @@ class control(functions):
         if (len(theta < max_len)):
             for i in range(max_len - len(theta)):
                 theta = np.append(theta, [theta[len(theta) - 1]], axis = 0)
-        print("theta 생성 완료")
-        print(theta)
 
         return theta
 
@@ -163,18 +166,18 @@ class control(functions):
         [theta1_x, theta1_y, theta1_z] = functions.leg_IK(self, commend[0])
         [theta2_x, theta2_y, theta2_z] = functions.leg_IK(self, commend[1])
 
-        print([theta1_x, theta1_y, theta1_z])
+
 
         dtheta = [abs(theta1_x - theta2_x), abs(theta1_y - theta2_y), abs(theta1_z - theta2_z)] #최대 각 변위 계산하여 구간 개수 정하기
         max_dtheta = dtheta[0]
-        print(dtheta)
+
         for num in dtheta:
             if (max_dtheta is None or num > max_dtheta):
                 max_dtheta = num
 
-        print(max_dtheta)
+
         n = int(max_dtheta/(vel*dt)) + 1
-        print(n)
+
         dot_x = np.linspace(dot1[0], dot2[0], n)
         dot_y = np.linspace(dot1[1], dot2[1], n)
         dot_z = np.linspace(dot1[2], dot2[2], n)
@@ -194,13 +197,11 @@ class control(functions):
         [theta2_x, theta2_y, theta2_z] = theta2
 
         dtheta = [abs(theta1_x - theta2_x), abs(theta1_y - theta2_y), abs(theta1_z - theta2_z)] #최대 각 변위 계산하여 구간 개수 정하기
-        print(dtheta)
         max_dtheta = dtheta[0]
         for num in dtheta:
             if (max_dtheta is None or num > max_dtheta):
                 max_dtheta = num
 
-        print(max_dtheta)
         n = int(max_dtheta/(vel*dt)) + 1
 
         print(n)
@@ -218,12 +219,6 @@ class control(functions):
         return theta
 
 class motion(functions):
-    def dot_move(self, axis, len, dot):
-        axis_dic = {'x' : 0, 'y' : 1, 'z' : 2}
-        axis = axis_dic[axis]
-        dot[axis] = dot[axis] + len
-        return dot
-
     def foward(self): #캘리브레이션 -> 걷는 알고리즘 수작업으로 만들기
         dot1 = [0, 25, 120]
         dot2 = [30, 25, 100]
@@ -333,6 +328,89 @@ class motion(functions):
         pass
     def right(self):
         pass
+    def test(self):
+        dot = [15, 20, 120]
+
+        commend = [[dot, dot, 2],[dot, dot, 2],[dot, dot, 2],[dot, dot, 2]]
+        walksp = 100
+
+        control.commend_set(self, commend) 
+        control.commend(self, commend, "front_R", dot, "linear")
+        control.commend(self, commend, "back_R", dot, "linear")
+        control.commend(self, commend, "front_L", dot, "linear")
+        control.commend(self, commend, "back_L", dot, "linear")
+        print(commend)
+        control.commend_run(self, commend, walksp)
+        time.sleep(1)
+
+        while (1):
+            control.commend_set(self, commend)
+            control.commend(self, commend, "front_R", dot, "linear")
+            control.commend(self, commend, "back_R", dot, "linear")
+            control.commend(self, commend, "front_L", dot, "linear")
+            control.commend(self, commend, "back_L", dot, "linear")
+            print(commend)
+            
+            control.commend_run(self, commend, walksp)
+            print('서기')
+            time.sleep(5)
+
+            control.commend_set(self, commend) #왼 뒷발 들 준비
+            dot1 = functions.dot_move(self, 'x', 20, dot)
+            dot1 = functions.dot_move(self, 'y', 20, dot1)
+            dot2 = functions.dot_move(self, 'x', 20, dot)
+            dot2 = functions.dot_move(self, 'y', -20, dot2)
+            control.commend(self, commend, "front_R", dot1, "linear")
+            control.commend(self, commend, "back_R", dot1, "linear")
+            control.commend(self, commend, "front_L", dot1, "linear")
+            control.commend(self, commend, "back_L", dot1, "linear")
+            print(commend)
+            control.commend_run(self, commend, walksp)
+            print('왼뒷')
+            time.sleep(1)
+
+            control.commend_set(self, commend) #오른 뒷발 들 준비
+            dot1 = functions.dot_move(self, 'x', 20, dot)
+            dot1 = functions.dot_move(self, 'y', -20, dot1)
+            dot2 = functions.dot_move(self, 'x', 20, dot)
+            dot2 = functions.dot_move(self, 'y', 20, dot2)
+            control.commend(self, commend, "front_R", dot1, "linear")
+            control.commend(self, commend, "back_R", dot1, "linear")
+            control.commend(self, commend, "front_L", dot1, "linear")
+            control.commend(self, commend, "back_L", dot1, "linear")
+            print(commend)
+            control.commend_run(self, commend, walksp)
+            print('오른뒷')
+            time.sleep(1)
+
+            control.commend_set(self, commend) #오른 앞발 들 준비
+            dot1 = functions.dot_move(self, 'x', -20, dot)
+            dot1 = functions.dot_move(self, 'y', 20, dot1)
+            dot2 = functions.dot_move(self, 'x', -20, dot)
+            dot2 = functions.dot_move(self, 'y', -20, dot2)
+            control.commend(self, commend, "front_R", dot1, "linear")
+            control.commend(self, commend, "back_R", dot1, "linear")
+            control.commend(self, commend, "front_L", dot1, "linear")
+            control.commend(self, commend, "back_L", dot1, "linear")
+            print(commend)
+            control.commend_run(self, commend, walksp)
+            print('오른앞')
+            time.sleep(1)
+
+            control.commend_set(self, commend) #왼 앞발 들 준비
+            dot1 = functions.dot_move(self, 'x', -20, dot)
+            dot1 = functions.dot_move(self, 'y', -20, dot1)
+            dot2 = functions.dot_move(self, 'x', -20, dot)
+            dot2 = functions.dot_move(self, 'y', 20, dot2)
+            control.commend(self, commend, "front_R", dot1, "linear")
+            control.commend(self, commend, "back_R", dot1, "linear")
+            control.commend(self, commend, "front_L", dot1, "linear")
+            control.commend(self, commend, "back_L", dot1, "linear")
+            print(commend)
+            control.commend_run(self, commend, walksp)
+            print('왼앞')
+            time.sleep(1)
+
 
         
 
