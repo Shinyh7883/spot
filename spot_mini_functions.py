@@ -8,7 +8,7 @@ i2c_bus0=(busio.I2C(board.SCL_1, board.SDA_1))
 kit = list()
 kit.append(ServoKit(channels=16, i2c=i2c_bus0, address=0x40))
 for i in range(12):
-        kit[0].servo[i].set_pulse_width_range(500,2500)
+        kit[0].servo[i].set_pulse_width_range(600,2500)
 
 dt = 0.001 #각 구간 이동하는데 걸리는 시간
 
