@@ -1,7 +1,7 @@
 from spot_mini_functions import *
 motion = motion()
 control = control()
-dot = [0, 25, 120]
+dot = [0, 20, 120]
 
 commend = [[dot, dot, 2],[dot, dot, 2],[dot, dot, 2],[dot, dot, 2]]
 walksp = 400
