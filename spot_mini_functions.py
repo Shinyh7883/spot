@@ -18,9 +18,9 @@ class functions:
         l1 = 50
         l2 = 105
         l3 = 120
-        t1 = 80
+        t1 = 90
         t2 = -90
-        t3 = 10
+        t3 = 70
         #################
         x = location[0]
         y = location[1]
