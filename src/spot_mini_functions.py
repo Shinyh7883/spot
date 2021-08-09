@@ -211,7 +211,7 @@ class control(functions):
 
         n = int(max_dtheta/(vel*dt)) + 1
 
-        print(n)
+        # print(n)
 
         theta_x = np.linspace(theta1[0], theta2[0], n)
         theta_y = np.linspace(theta1[1], theta2[1], n)
@@ -227,48 +227,44 @@ class control(functions):
 
 class motion(functions):
 
-    dot = [60, 50, 150]
+    dot = [60, 50, 170]
 
     def foward(self, commend, run):
         ###준비###
-        motion.oneleg_raise(self, [-20, -5, -20], "front_R", commend)
-        print(commend)
+        motion.oneleg_raise(self, [-20, -10, -30], "front_R", commend)
+        motion.body_move(self, [20, 10], commend) 
+        #print(commend)
 
-        motion.oneleg_raise(self, [25, 5, -20], "back_L", commend)
-        print(commend)
+        motion.oneleg_raise(self, [20, 10, -30], "back_L", commend)
+        #print(commend)
 
-        motion.body_move(self, [20, 0], commend) 
-        print(commend)
+        motion.body_move(self, [10, -10], commend) 
+        #print(commend)
 
         ###걷기###
         while run == 1:
 
-            motion.oneleg_raise(self, [-20, 5, -20], "front_L", commend)
-            print(commend)
+            motion.oneleg_raise(self, [-20, 10, -60], "front_L", commend)
+            motion.body_move(self, [20, -10], commend) 
 
-            motion.oneleg_raise(self, [25, -5, -20], "back_R", commend)
-            print(commend)
+            motion.oneleg_raise(self, [20, -10, -60], "back_R", commend)
 
-            motion.body_move(self, [20, 0], commend)
-            print(commend)
+            motion.body_move(self, [10, 10], commend)
 
-            motion.oneleg_raise(self, [-20, -5, -20], "front_R", commend)
-            print(commend)
+            motion.oneleg_raise(self, [-20, -10, -60], "front_R", commend)
+            motion.body_move(self, [20, 10], commend) 
 
-            motion.oneleg_raise(self, [25, 5, -20], "back_L", commend)
-            print(commend)
+            motion.oneleg_raise(self, [20, 10, -60], "back_L", commend)
 
-            motion.body_move(self, [20, 0], commend)
-            print(commend)
+            motion.body_move(self, [10, -10], commend)
 
         ###멈추기###
-        motion.oneleg_raise(self, [-20, 5, -10], "front_L", commend)
+        motion.oneleg_raise(self, [-20, 10, -30], "front_L", commend)
+        motion.body_move(self, [20, -10], commend) 
 
-        motion.body_move(self, [20, -5], commend)
+        motion.oneleg_raise(self, [20, -10, -30], "back_R", commend)
+        motion.body_move(self, [-20, 10], commend) 
 
-        motion.oneleg_raise(self, [25, -5, 15], "back_R", commend)
-
-        motion.body_move(self, [5, 5], commend)
 
     def body_move(self, A, commend):
 
@@ -295,7 +291,7 @@ class motion(functions):
 
     def oneleg_raise(self, A, leg, commend): #A 는 [20, 5] 가 적당
 
-        walksp = 100
+        walksp = 300
         front_R = functions.dot_move(self, 'x', A[0], commend[0][0])
         front_R = functions.dot_move(self, 'y', A[1], front_R)
 
@@ -314,42 +310,61 @@ class motion(functions):
         control.commend(self, commend, "front_L", front_L, "linear")
         control.commend(self, commend, "back_L", back_L, "linear")
 
-        leg_dic = {'front_R' : commend[0][0], 'front_L' : commend[1][0], 'back_R' : commend[2][0], 'back_L' : commend[3][0]}
+        leg_dic = {'front_R' : front_R, 'front_L' : front_L, 'back_R' : back_R, 'back_L' : back_L}
 
         leg_move = leg_dic[leg]
 
-        dot3 = functions.dot_move(self, 'z', -30, leg_move)
+        dot3 = functions.dot_move(self, 'z', -40, leg_move)
 
         control.commend(self, commend, leg, dot3, "linear")
+
+        print(commend)
         
         control.commend_run(self, commend, walksp)
         control.commend_set(self, commend) 
 
-        time.sleep(0.5)
+        time.sleep(0.1)
 
         dot3 = functions.dot_move(self, 'x', A[2], dot3)
         dot3 = functions.dot_move(self, 'z', 30, dot3)
 
+        control.commend(self, commend, leg, dot3, "direct")
+
+        control.commend_run(self, commend, walksp)
+        control.commend_set(self, commend) 
+
+        dot3 = functions.dot_move(self, 'z', 10, dot3)
          
-        control.commend(self, commend, leg, dot3, "linear")
+        control.commend(self, commend, leg, dot3, "direct")
+
+        print(commend)
         control.commend_run(self, commend, walksp)
         control.commend_set(self, commend)
 
-        time.sleep(0.5)
+        time.sleep(0.1)
 
-        front_R = functions.dot_move(self, 'x', -A[0], commend[0][0])
-        front_R = functions.dot_move(self, 'y', -A[1], front_R)
+        # front_R = functions.dot_move(self, 'x', -A[0], commend[0][0])
+        # front_R = functions.dot_move(self, 'y', -A[1], front_R)
 
-        back_R = functions.dot_move(self, 'x', -A[0], commend[2][0])
-        back_R = functions.dot_move(self, 'y', -A[1], back_R)
+        # back_R = functions.dot_move(self, 'x', -A[0], commend[2][0])
+        # back_R = functions.dot_move(self, 'y', -A[1], back_R)
 
-        front_L = functions.dot_move(self, 'x', -A[0], commend[1][0])
-        front_L = functions.dot_move(self, 'y', A[1], front_L)
+        # front_L = functions.dot_move(self, 'x', -A[0], commend[1][0])
+        # front_L = functions.dot_move(self, 'y', A[1], front_L)
 
-        back_L = functions.dot_move(self, 'x', -A[0], commend[3][0])
-        back_L = functions.dot_move(self, 'y', A[1], back_L)
+        # back_L = functions.dot_move(self, 'x', -A[0], commend[3][0])
+        # back_L = functions.dot_move(self, 'y', A[1], back_L)
 
-        time.sleep(0.5)
+        # control.commend(self, commend, "front_R", front_R, "linear")
+        # control.commend(self, commend, "back_R", back_R, "linear")
+        # control.commend(self, commend, "front_L", front_L, "linear")
+        # control.commend(self, commend, "back_L", back_L, "linear")
+
+        # print(commend)
+        # control.commend_run(self, commend, walksp)
+        # control.commend_set(self, commend)
+
+        # time.sleep(0.1)
 
 
 
