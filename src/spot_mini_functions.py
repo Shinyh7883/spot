@@ -86,17 +86,23 @@ class functions:
         dot_move[axis] = dot_move[axis] + len
         return dot_move
 
-    def fifthpoly(self, t, commend):
-        n = int(t/dt)
-        t = np.linspace(0, t, n + 1)
-        D = math.sqrt((commend[1][0] - commend[0][0])**2 + (commend[1][1] - commend[0][1])**2 + (commend[1][2] - commend[0][2])**2)
+    def fifthpoly(self, dot1, dot2):
+        Dt = np.empty((1, 1))
+        v = 400 # 1초에 이동 거리
 
-        Dt = np.empty((1,3))
-        for i in range(len(t)):
-            dtime = np.array([[theta_x[i], theta_y[i], theta_z[i]]])
-            Dt = np.append(theta, dtheta, axis = 0)
-        Dt = np.delete(theta, [0,0], axis = 0)
+        D = math.sqrt((dot2[0] - dot1[0]) ** 2 + (dot2[1] - dot1[1]) ** 2 + (dot2[2] - dot1[2]) ** 2)
+        T = 0
+        t = D / v
+        if t == 0:
+            Dt = [D]
+        else:
+            while T <= t:
+                Dt = np.append(Dt, [[(D * T ** 3.0 / (2.0 * t ** 3.0)) * (20.0 - 30.0 * T / t + 12.0 * T ** 2.0 / t ** 2.0)]], axis = 0)
+                T += dt
+            Dt = np.delete(Dt, [0, 0], axis = 0)
 
+        
+        return Dt
 
     def cg_calc(self, commend):
         pass
@@ -170,7 +176,7 @@ class control(functions):
        
 
     def array_len_equalization(self, theta, max_len): # 제일 긴 행렬에 맞추어 마지막값 복사
-        if (len(theta < max_len)):
+        if (len(theta) < max_len):
             for i in range(max_len - len(theta)):
                 theta = np.append(theta, [theta[len(theta) - 1]], axis = 0)
 
@@ -182,30 +188,17 @@ class control(functions):
         dot1 = commend[0]
         dot2 = commend[1]
 
-        [theta1_x, theta1_y, theta1_z] = functions.leg_IK(self, commend[0])
-        [theta2_x, theta2_y, theta2_z] = functions.leg_IK(self, commend[1])
-
-
-
-        dtheta = [abs(theta1_x - theta2_x), abs(theta1_y - theta2_y), abs(theta1_z - theta2_z)] #최대 각 변위 계산하여 구간 개수 정하기
-        max_dtheta = dtheta[0]
-
-        for num in dtheta:
-            if (max_dtheta is None or num > max_dtheta):
-                max_dtheta = num
-
-
-        n = int(max_dtheta/(vel*dt)) + 1
-
-        dot_x = np.linspace(dot1[0], dot2[0], n)
-        dot_y = np.linspace(dot1[1], dot2[1], n)
-        dot_z = np.linspace(dot1[2], dot2[2], n)
-
-        theta = np.empty((1, 3))
-        for i in range(np.shape(dot_x)[0]): #0 아님 1 이다
-            theta = np.append(theta, [functions.leg_IK(self, [dot_x[i], dot_y[i], dot_z[i]])], axis = 0)
-        theta = np.delete(theta, [0, 0], axis = 0)
-
+        D = math.sqrt((dot2[0] - dot1[0]) ** 2 + (dot2[1] - dot1[1]) ** 2 + (dot2[2] - dot1[2]) ** 2)
+        if D == 0:
+            theta = [functions.leg_IK(self, dot2)]
+        else:
+            Dt = functions.fifthpoly(self, dot1, dot2)
+            theta = np.empty((1, 3))
+            for i in range(len(Dt)): #0 아님 1 이다
+                dot = [ ((D - Dt[i]) * dot1[0] + Dt[i] * dot2[0]) / D, ((D - Dt[i]) * dot1[1] + Dt[i] * dot2[1]) / D, ((D - Dt[i]) * dot1[2] + Dt[i] * dot2[2]) / D]
+                theta = np.append(theta, [functions.leg_IK(self, dot)], axis = 0)
+            theta = np.delete(theta, [0, 0], axis = 0)
+        
         return theta
 
     def direct(self, commend, vel): #vel_max = 350deg/sec
@@ -239,7 +232,7 @@ class control(functions):
 
 class motion(functions):
 
-    dot = [60, 50, 170]
+    dot = [55, 50, 170]
 
     def foward(self, commend, run):
         ###준비###
@@ -294,10 +287,10 @@ class motion(functions):
         back_L = functions.dot_move(self, 'y', -A[1], back_L)
 
          
-        control.commend(self, commend, "front_R", front_R, "linear")
-        control.commend(self, commend, "back_R", back_R, "linear")
-        control.commend(self, commend, "front_L", front_L, "linear")
-        control.commend(self, commend, "back_L", back_L, "linear")
+        control.commend(self, commend, "front_R", front_R, "direct")
+        control.commend(self, commend, "back_R", back_R, "direct")
+        control.commend(self, commend, "front_L", front_L, "direct")
+        control.commend(self, commend, "back_L", back_L, "direct")
         control.commend_run(self, commend, walksp)
         control.commend_set(self, commend)
 
@@ -335,25 +328,17 @@ class motion(functions):
         control.commend_run(self, commend, walksp)
         control.commend_set(self, commend) 
 
-        time.sleep(0.1)
+        # time.sleep(0.1)
 
         dot3 = functions.dot_move(self, 'x', A[2], dot3)
-        dot3 = functions.dot_move(self, 'z', 30, dot3)
+        dot3 = functions.dot_move(self, 'z', 40, dot3)
 
         control.commend(self, commend, leg, dot3, "direct")
 
         control.commend_run(self, commend, walksp)
         control.commend_set(self, commend) 
 
-        dot3 = functions.dot_move(self, 'z', 10, dot3)
-         
-        control.commend(self, commend, leg, dot3, "direct")
-
-        print(commend)
-        control.commend_run(self, commend, walksp)
-        control.commend_set(self, commend)
-
-        time.sleep(0.1)
+        # time.sleep(0.1)
 
         # front_R = functions.dot_move(self, 'x', -A[0], commend[0][0])
         # front_R = functions.dot_move(self, 'y', -A[1], front_R)
