@@ -90,12 +90,12 @@ class functions:
         n = int(t/dt)
         t = np.linspace(0, t, n + 1)
         D = math.sqrt((commend[1][0] - commend[0][0])**2 + (commend[1][1] - commend[0][1])**2 + (commend[1][2] - commend[0][2])**2)
-        Dt = 
-        theta = np.empty((1,3))
-        for i in range(len(theta_x)):
-            dtheta = np.array([[theta_x[i], theta_y[i], theta_z[i]]])
-            theta = np.append(theta, dtheta, axis = 0)
-        theta = np.delete(theta, [0,0], axis = 0)
+
+        Dt = np.empty((1,3))
+        for i in range(len(t)):
+            dtime = np.array([[theta_x[i], theta_y[i], theta_z[i]]])
+            Dt = np.append(theta, dtheta, axis = 0)
+        Dt = np.delete(theta, [0,0], axis = 0)
 
 
     def cg_calc(self, commend):
