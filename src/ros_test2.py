@@ -8,11 +8,16 @@ B = [15, 50, 150]
 
 def location_move(A):
     rate = rospy.Rate(10)
-    motion.test2([A.data[0], A.data[1]])
+    dot = [55, 50, 170]
+
+    commend = [[dot, dot, 2],[dot, dot, 2],[dot, dot, 2],[dot, dot, 2]]
+    print(A.data)
+
+    motion.foward(commend, A.data)
 
 def listener():
     rospy.init_node('ros_test2', anonymous=True)
-    rospy.Subscriber('location', Int32MultiArray, location_move)
+    rospy.Subscriber('location', Int32, location_move)
 
     rospy.spin()
 

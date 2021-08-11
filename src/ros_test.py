@@ -5,14 +5,13 @@ from std_msgs.msg import Int32MultiArray, Int32
 
 def motion():
     rospy.init_node('ros_test1', anonymous=True)
-    pub1 = rospy.Publisher('location', Int32MultiArray, queue_size=1) 
+    pub1 = rospy.Publisher('location', Int32, queue_size=1) 
     rate = rospy.Rate(10)
 
     while not rospy.is_shutdown():
-        location_x = input("x좌표 입력하세요")
-        location_y = input("y좌표 입력하세요")
-        b=Int32MultiArray()
-        b.data=[int(location_x), int(location_y)]
+        run= input("1: 이동 2: 멈춤")
+        b=Int32()
+        b.data=int(run)
         print(b)
         pub1.publish(b)
         

@@ -8,3 +8,4 @@ dot = [55, 50, 170]
 commend = [[dot, dot, 2],[dot, dot, 2],[dot, dot, 2],[dot, dot, 2]]
 
 motion.foward(commend, run)
+motion.backward(commend, run)
