@@ -234,6 +234,11 @@ class motion(functions):
 
     dot = [55, 50, 170]
 
+    #####치수#####
+    L = 180 #길이
+    W = 200 #너비
+    #############
+
     def foward(self, commend, run): #객체지향화 하기
         ###준비###
         motion.oneleg_raise(self, [-20, -20, -40], "front_R", commend)
@@ -309,6 +314,43 @@ class motion(functions):
         motion.oneleg_raise(self, [-20, 20, 40], "front_L", commend)
         motion.body_move(self, [20, -20], commend) 
 
+    def right(self, commend, run): #객체지향화 하기
+        
+        ###준비###
+        motion.oneleg_raise(self, [-20, -20, -40], "front_R", commend)
+        motion.body_move(self, [20, 20], commend) 
+        #print(commend)
+
+        motion.oneleg_raise(self, [20, 20, -40], "back_L", commend)
+        #print(commend)
+
+        motion.body_move(self, [20, -20], commend) 
+        #print(commend)
+
+        ###걷기###
+        if run == 1:
+
+            motion.oneleg_raise(self, [-20, 20, -80], "front_L", commend)
+            motion.body_move(self, [20, -20], commend) 
+
+            motion.oneleg_raise(self, [20, -20, -80], "back_R", commend)
+
+            motion.body_move(self, [20, 20], commend)
+
+            motion.oneleg_raise(self, [-20, -20, -80], "front_R", commend)
+            motion.body_move(self, [20, 20], commend) 
+
+            motion.oneleg_raise(self, [20, 20, -80], "back_L", commend)
+
+            motion.body_move(self, [20, -20], commend)
+
+        ###멈추기###
+        motion.oneleg_raise(self, [-20, 20, -40], "front_L", commend)
+        motion.body_move(self, [20, -20], commend) 
+
+        motion.oneleg_raise(self, [20, -20, -40], "back_R", commend)
+        motion.body_move(self, [-20, 20], commend) 
+
     def body_move(self, A, commend):
 
         walksp = 100
@@ -323,6 +365,38 @@ class motion(functions):
 
         back_L = functions.dot_move(self, 'x', A[0], commend[3][0])
         back_L = functions.dot_move(self, 'y', -A[1], back_L)
+
+         
+        control.commend(self, commend, "front_R", front_R, "linear")
+        control.commend(self, commend, "back_R", back_R, "linear")
+        control.commend(self, commend, "front_L", front_L, "linear")
+        control.commend(self, commend, "back_L", back_L, "linear")
+        control.commend_run(self, commend, walksp)
+        control.commend_set(self, commend)
+
+    def body_rotate(self, t, commend):
+
+        walksp = 100
+        theta = abs(t)
+        D = math.sqrt(self.W ** 2 + self.L ** 2) / 2
+        a = D * math.sin(np.deg2rad(theta) + math.atan2(self.W, self.L)) - self.W/2
+        b = self.L/2 - D * math.cos(np.deg2rad(theta) + math.atan2(self.W, self.L))
+        if t <= 0:
+            [a, b] = [-a, -b]
+
+        print([a, b])
+
+        front_R = functions.dot_move(self, 'x', b, commend[0][0])
+        front_R = functions.dot_move(self, 'y', -a, front_R)
+
+        back_R = functions.dot_move(self, 'x', b, commend[2][0])
+        back_R = functions.dot_move(self, 'y', a, back_R)
+
+        front_L = functions.dot_move(self, 'x', -b, commend[1][0])
+        front_L = functions.dot_move(self, 'y', a, front_L)
+
+        back_L = functions.dot_move(self, 'x', -b, commend[3][0])
+        back_L = functions.dot_move(self, 'y', -a, back_L)
 
          
         control.commend(self, commend, "front_R", front_R, "linear")
