@@ -114,7 +114,7 @@ class control(functions):
     def commend_set(self, commend):
         for i in range(4):
             commend[i][0] = commend[i][1] #이동 완료한 상태로 전환
-        print("set")
+        # print("set")
 
     def commend(self, commend, leg, dot, type): #현 위치에서 이동할 점 입력
         if type == "linear":
@@ -241,11 +241,11 @@ class motion(functions):
 
     def foward(self, commend, run): #객체지향화 하기
         ###준비###
-        motion.oneleg_raise(self, [-20, -20, -40], "front_R", commend)
+        motion.oneleg_move(self, [-20, -20, -40], "front_R", commend)
         motion.body_move(self, [20, 20], commend) 
         #print(commend)
 
-        motion.oneleg_raise(self, [20, 20, -40], "back_L", commend)
+        motion.oneleg_move(self, [20, 20, -40], "back_L", commend)
         #print(commend)
 
         motion.body_move(self, [20, -20], commend) 
@@ -254,35 +254,35 @@ class motion(functions):
         ###걷기###
         if run == 1:
 
-            motion.oneleg_raise(self, [-20, 20, -80], "front_L", commend)
+            motion.oneleg_move(self, [-20, 20, -80], "front_L", commend)
             motion.body_move(self, [20, -20], commend) 
 
-            motion.oneleg_raise(self, [20, -20, -80], "back_R", commend)
+            motion.oneleg_move(self, [20, -20, -80], "back_R", commend)
 
             motion.body_move(self, [20, 20], commend)
 
-            motion.oneleg_raise(self, [-20, -20, -80], "front_R", commend)
+            motion.oneleg_move(self, [-20, -20, -80], "front_R", commend)
             motion.body_move(self, [20, 20], commend) 
 
-            motion.oneleg_raise(self, [20, 20, -80], "back_L", commend)
+            motion.oneleg_move(self, [20, 20, -80], "back_L", commend)
 
             motion.body_move(self, [20, -20], commend)
 
         ###멈추기###
-        motion.oneleg_raise(self, [-20, 20, -40], "front_L", commend)
+        motion.oneleg_move(self, [-20, 20, -40], "front_L", commend)
         motion.body_move(self, [20, -20], commend) 
 
-        motion.oneleg_raise(self, [20, -20, -40], "back_R", commend)
+        motion.oneleg_move(self, [20, -20, -40], "back_R", commend)
         motion.body_move(self, [-20, 20], commend) 
 
     def backward(self, commend, run): #객체지향화 하기
         ###준비###
         
-        motion.oneleg_raise(self, [20, 20, 40], "back_L", commend)
+        motion.oneleg_move(self, [20, 20, 40], "back_L", commend)
         motion.body_move(self, [-20, -20], commend) 
         #print(commend)
 
-        motion.oneleg_raise(self, [-20, -20, 40], "front_R", commend)
+        motion.oneleg_move(self, [-20, -20, 40], "front_R", commend)
         #print(commend)
 
         motion.body_move(self, [-20, 20], commend) 
@@ -292,64 +292,53 @@ class motion(functions):
         if run == 1:
 
             
-            motion.oneleg_raise(self, [20, -20, 80], "back_R", commend)
+            motion.oneleg_move(self, [20, -20, 80], "back_R", commend)
             motion.body_move(self, [-20, 20], commend) 
 
-            motion.oneleg_raise(self, [-20, 20, 80], "front_L", commend)
+            motion.oneleg_move(self, [-20, 20, 80], "front_L", commend)
 
             motion.body_move(self, [-20, -20], commend)
 
-            motion.oneleg_raise(self, [20, 20, 80], "back_L", commend)
+            motion.oneleg_move(self, [20, 20, 80], "back_L", commend)
             motion.body_move(self, [-20, -20], commend) 
 
-            motion.oneleg_raise(self, [-20, -20, 80], "front_R", commend)
+            motion.oneleg_move(self, [-20, -20, 80], "front_R", commend)
 
             motion.body_move(self, [-20, 20], commend)
 
         ###멈추기###
         
-        motion.oneleg_raise(self, [20, -20, 40], "back_R", commend)
+        motion.oneleg_move(self, [20, -20, 40], "back_R", commend)
         motion.body_move(self, [-20, 20], commend) 
 
-        motion.oneleg_raise(self, [-20, 20, 40], "front_L", commend)
+        motion.oneleg_move(self, [-20, 20, 40], "front_L", commend)
         motion.body_move(self, [20, -20], commend) 
 
     def right(self, commend, run): #객체지향화 하기
-        
-        ###준비###
-        motion.oneleg_raise(self, [-20, -20, -40], "front_R", commend)
-        motion.body_move(self, [20, 20], commend) 
-        #print(commend)
-
-        motion.oneleg_raise(self, [20, 20, -40], "back_L", commend)
-        #print(commend)
-
-        motion.body_move(self, [20, -20], commend) 
-        #print(commend)
-
-        ###걷기###
+        ###돌기###
         if run == 1:
+            motion.body_rotate(self, 20, commend)
 
-            motion.oneleg_raise(self, [-20, 20, -80], "front_L", commend)
-            motion.body_move(self, [20, -20], commend) 
+            motion.oneleg_rotate(self, [20, 25], "back_L", commend)
 
-            motion.oneleg_raise(self, [20, -20, -80], "back_R", commend)
+            motion.oneleg_rotate(self, [10, -15], "back_R", commend)
+            
+            motion.oneleg_rotate(self, [-30, 25], "front_L", commend) 
 
-            motion.body_move(self, [20, 20], commend)
+            motion.oneleg_rotate(self, [-20, -25], "front_R", commend)
 
-            motion.oneleg_raise(self, [-20, -20, -80], "front_R", commend)
-            motion.body_move(self, [20, 20], commend) 
+    def left(self, commend, run): #객체지향화 하기
+        ###돌기###
+        if run == 1:
+            motion.body_rotate(self, -20, commend)
 
-            motion.oneleg_raise(self, [20, 20, -80], "back_L", commend)
+            motion.oneleg_rotate(self, [20, -25], "back_R", commend)
 
-            motion.body_move(self, [20, -20], commend)
+            motion.oneleg_rotate(self, [10, 15], "back_L", commend)
 
-        ###멈추기###
-        motion.oneleg_raise(self, [-20, 20, -40], "front_L", commend)
-        motion.body_move(self, [20, -20], commend) 
+            motion.oneleg_rotate(self, [-30, -25], "front_R", commend)
 
-        motion.oneleg_raise(self, [20, -20, -40], "back_R", commend)
-        motion.body_move(self, [-20, 20], commend) 
+            motion.oneleg_rotate(self, [-20, 25], "front_L", commend) 
 
     def body_move(self, A, commend):
 
@@ -406,7 +395,7 @@ class motion(functions):
         control.commend_run(self, commend, walksp)
         control.commend_set(self, commend)
 
-    def oneleg_raise(self, A, leg, commend): #A 는 [20, 5] 가 적당
+    def oneleg_move(self, A, leg, commend): #A 는 [20, 5] 가 적당
 
         walksp = 400
         front_R = functions.dot_move(self, 'x', A[0], commend[0][0])
@@ -486,6 +475,88 @@ class motion(functions):
         # control.commend_set(self, commend)
 
         # time.sleep(0.1)
+
+    def oneleg_rotate(self, A, leg, commend): #A 는 [20, 5] 가 적당
+
+        walksp = 400
+        front_R = functions.dot_move(self, 'x', A[0], commend[0][0])
+        front_R = functions.dot_move(self, 'y', A[1], front_R)
+
+        back_R = functions.dot_move(self, 'x', A[0], commend[2][0])
+        back_R = functions.dot_move(self, 'y', A[1], back_R)
+
+        front_L = functions.dot_move(self, 'x', A[0], commend[1][0])
+        front_L = functions.dot_move(self, 'y', -A[1], front_L)
+
+        back_L = functions.dot_move(self, 'x', A[0], commend[3][0])
+        back_L = functions.dot_move(self, 'y', -A[1], back_L)
+
+        
+        control.commend(self, commend, "front_R", front_R, "linear")
+        control.commend(self, commend, "back_R", back_R, "linear")
+        control.commend(self, commend, "front_L", front_L, "linear")
+        control.commend(self, commend, "back_L", back_L, "linear")
+
+        control.commend_run(self, commend, 200)
+        control.commend_set(self, commend) 
+
+        leg_dic = {'front_R' : front_R, 'front_L' : front_L, 'back_R' : back_R, 'back_L' : back_L}
+        move_dic = {'front_R' : [A[0], A[1]], 'front_L' : [A[0], -A[1]], 'back_R' : [A[0], A[1]], 'back_L' : [A[0], -A[1]]}
+        leg_move = leg_dic[leg]
+
+        dot3 = functions.dot_move(self, 'z', -20, leg_move)
+
+        control.commend(self, commend, leg, dot3, "linear")
+
+        # print(commend)
+        
+        control.commend_run(self, commend, walksp)
+        control.commend_set(self, commend)
+
+        dot3 = functions.dot_move(self, 'z', -20, self.dot)
+        dot3 = functions.dot_move(self, 'x', move_dic[leg][0], dot3)
+        dot3 = functions.dot_move(self, 'y', move_dic[leg][1], dot3)
+        # print(dot3)
+
+
+        control.commend(self, commend, leg, dot3, "linear")
+
+        # print(commend)
+        
+        control.commend_run(self, commend, 200)
+        control.commend_set(self, commend) 
+
+        # time.sleep(0.1)
+
+        
+        dot3 = functions.dot_move(self, 'z', 20, dot3)
+        # print(dot3)
+
+        control.commend(self, commend, leg, dot3, "linear")
+
+        control.commend_run(self, commend, 100)
+        control.commend_set(self, commend) 
+
+        front_R = functions.dot_move(self, 'x', -A[0], commend[0][0])
+        front_R = functions.dot_move(self, 'y', -A[1], front_R)
+
+        back_R = functions.dot_move(self, 'x', -A[0], commend[2][0])
+        back_R = functions.dot_move(self, 'y', -A[1], back_R)
+
+        front_L = functions.dot_move(self, 'x', -A[0], commend[1][0])
+        front_L = functions.dot_move(self, 'y', A[1], front_L)
+
+        back_L = functions.dot_move(self, 'x', -A[0], commend[3][0])
+        back_L = functions.dot_move(self, 'y', A[1], back_L)
+
+        control.commend(self, commend, "front_R", front_R, "linear")
+        control.commend(self, commend, "back_R", back_R, "linear")
+        control.commend(self, commend, "front_L", front_L, "linear")
+        control.commend(self, commend, "back_L", back_L, "linear")
+
+        #print(commend)
+        control.commend_run(self, commend, 200)
+        control.commend_set(self, commend)
 
 
 
