@@ -342,7 +342,7 @@ class motion(functions):
 
     def body_move(self, A, commend):
 
-        walksp = 100
+        walksp = 200
         front_R = functions.dot_move(self, 'x', A[0], commend[0][0])
         front_R = functions.dot_move(self, 'y', A[1], front_R)
 
@@ -365,7 +365,7 @@ class motion(functions):
 
     def body_rotate(self, t, commend):
 
-        walksp = 100
+        walksp = 200
         theta = abs(t)
         D = math.sqrt(self.W ** 2 + self.L ** 2) / 2
         a = D * math.sin(np.deg2rad(theta) + math.atan2(self.W, self.L)) - self.W/2
@@ -448,7 +448,7 @@ class motion(functions):
 
         control.commend(self, commend, leg, dot3, "linear")
 
-        control.commend_run(self, commend, walksp)
+        control.commend_run(self, commend, 100)
         control.commend_set(self, commend) 
 
         # time.sleep(0.1)
