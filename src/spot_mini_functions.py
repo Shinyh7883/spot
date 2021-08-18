@@ -44,7 +44,6 @@ class functions:
 
         return theta
 
-
     def move(self, theta, max_len): #다리별 각도값 입력
         
         for i in range(max_len):
@@ -139,7 +138,6 @@ class control(functions):
 
         return commend
 
-
     def commend_run(self, commend, vel):
         if commend[0][2] == 1:
             theta1 = control.linear(self, commend[0], vel)
@@ -173,7 +171,6 @@ class control(functions):
         # print("len_equalization")
         theta_run = [theta1, theta2, theta3, theta4]
         self.move(theta_run, max_len)
-       
 
     def array_len_equalization(self, theta, max_len): # 제일 긴 행렬에 맞추어 마지막값 복사
         if (len(theta) < max_len):
@@ -181,8 +178,6 @@ class control(functions):
                 theta = np.append(theta, [theta[len(theta) - 1]], axis = 0)
 
         return theta
-
-
 
     def linear(self, commend, vel):  #속도 입력 해서 거리를 나누어 구간 갯수 정하자
         dot1 = commend[0]
@@ -252,7 +247,7 @@ class motion(functions):
         #print(commend)
 
         ###걷기###
-        if run == 1:
+        while run == 1:
 
             motion.oneleg_move(self, [-20, 20, -80], "front_L", commend)
             motion.body_move(self, [20, -20], commend) 
