@@ -11,5 +11,6 @@ while (1):
     motion.left(commend, run)
     motion.foward(commend, run)
     motion.backward(commend, run)
+    # motion.foward_test(commend, run) #망함,,, 앞이 캄캄쓰
     
 

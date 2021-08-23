@@ -16,6 +16,8 @@ while (1):
     control.commend_run(commend, 100)
     control.commend_set(commend)
 
+    print(commend)
+
     front_R = functions.dot_move('z', 20, commend[0][0])
     control.commend(commend, "front_R", front_R, "linear")
     control.commend_run(commend, 100)

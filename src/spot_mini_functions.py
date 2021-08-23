@@ -5,6 +5,8 @@ from adafruit_servokit import ServoKit
 import board
 import busio
 import time
+from sympy import Symbol, solve
+
 i2c_bus0=(busio.I2C(board.SCL_1, board.SDA_1))
 kit = list()
 kit.append(ServoKit(channels=16, i2c=i2c_bus0, address=0x40))
@@ -113,6 +115,7 @@ class control(functions):
     def commend_set(self, commend):
         for i in range(4):
             commend[i][0] = commend[i][1] #이동 완료한 상태로 전환
+
         # print("set")
 
     def commend(self, commend, leg, dot, type): #현 위치에서 이동할 점 입력
@@ -236,11 +239,13 @@ class motion(functions):
 
     def foward(self, commend, run): #객체지향화 하기
         ###준비###
-        motion.oneleg_move(self, [-20, -20, -40], "front_R", commend)
+        motion.oneleg_move(self, [-20, -20], -40, "front_R", commend)
+    
         motion.body_move(self, [20, 20], commend) 
         #print(commend)
 
-        motion.oneleg_move(self, [20, 20, -40], "back_L", commend)
+        motion.oneleg_move(self, [20, 20], -40, "back_L", commend)
+
         #print(commend)
 
         motion.body_move(self, [20, -20], commend) 
@@ -249,35 +254,83 @@ class motion(functions):
         ###걷기###
         while run == 1:
 
-            motion.oneleg_move(self, [-20, 20, -80], "front_L", commend)
+            motion.oneleg_move(self, [-20, 20], -80, "front_L", commend)
             motion.body_move(self, [20, -20], commend) 
 
-            motion.oneleg_move(self, [20, -20, -80], "back_R", commend)
+            motion.oneleg_move(self, [20, -20], -80, "back_R", commend)
 
             motion.body_move(self, [20, 20], commend)
 
-            motion.oneleg_move(self, [-20, -20, -80], "front_R", commend)
+            motion.oneleg_move(self, [-20, -20], -80, "front_R", commend)
             motion.body_move(self, [20, 20], commend) 
 
-            motion.oneleg_move(self, [20, 20, -80], "back_L", commend)
+            motion.oneleg_move(self, [20, 20], -80, "back_L", commend)
 
             motion.body_move(self, [20, -20], commend)
 
         ###멈추기###
-        motion.oneleg_move(self, [-20, 20, -40], "front_L", commend)
+        motion.oneleg_move(self, [-20, 20], -40, "front_L", commend)
         motion.body_move(self, [20, -20], commend) 
 
-        motion.oneleg_move(self, [20, -20, -40], "back_R", commend)
+        motion.oneleg_move(self, [20, -20], -40, "back_R", commend)
         motion.body_move(self, [-20, 20], commend) 
+
+    def foward_test(self, commend, run): #객체지향화 하기
+        ###준비###
+        a = self.cg_calc(commend, 4)[1]
+        motion.oneleg_move(self, a, -40, "front_R", commend)
+    
+        b = self.cg_calc(commend, 4)[4]
+        a = [-a[0] + b[0], -a[1] + b[1]]
+        motion.oneleg_move(self, a, -40, "back_L", commend)
+
+ 
+        ###걷기###
+        while run == 1:
+            b = self.cg_calc(commend, 4)[2]
+            a = [-a[0] + b[0], -a[1] + b[1]]
+
+            motion.oneleg_move(self, a, -80, "front_L", commend)
+
+            b = self.cg_calc(commend, 4)[3]
+            a = [-a[0] + b[0], -a[1] + b[1]]
+
+            motion.oneleg_move(self, a, -80, "back_R", commend)
+
+            b = self.cg_calc(commend, 4)[1]
+            a = [-a[0] + b[0], -a[1] + b[1]]
+
+            motion.oneleg_move(self, a, -80, "front_R", commend)
+            
+            b = self.cg_calc(commend, 4)[4]
+            a = [-a[0] + b[0], -a[1] + b[1]] 
+
+            motion.oneleg_move(self, a, -80, "back_L", commend)
+
+
+        ###멈추기###
+        b = self.cg_calc(commend, 4)[2]
+        a = [-a[0] + b[0], -a[1] + b[1]] 
+
+        motion.oneleg_move(self, a, -40, "front_L", commend)
+
+        b = self.cg_calc(commend, 4)[3]
+        a = [-a[0] + b[0], -a[1] + b[1]] 
+
+        motion.oneleg_move(self, a, -40, "back_R", commend)
+
+        b = self.cg_calc(commend, 4)[0]
+        a = [-a[0] + b[0], -a[1] + b[1]] 
+
 
     def backward(self, commend, run): #객체지향화 하기
         ###준비###
         
-        motion.oneleg_move(self, [20, 20, 40], "back_L", commend)
+        motion.oneleg_move(self, [20, 20], 40, "back_L", commend)
         motion.body_move(self, [-20, -20], commend) 
         #print(commend)
 
-        motion.oneleg_move(self, [-20, -20, 40], "front_R", commend)
+        motion.oneleg_move(self, [-20, -20], 40, "front_R", commend)
         #print(commend)
 
         motion.body_move(self, [-20, 20], commend) 
@@ -287,26 +340,26 @@ class motion(functions):
         if run == 1:
 
             
-            motion.oneleg_move(self, [20, -20, 80], "back_R", commend)
+            motion.oneleg_move(self, [20, -20], 80, "back_R", commend)
             motion.body_move(self, [-20, 20], commend) 
 
-            motion.oneleg_move(self, [-20, 20, 80], "front_L", commend)
+            motion.oneleg_move(self, [-20, 20], 80, "front_L", commend)
 
             motion.body_move(self, [-20, -20], commend)
 
-            motion.oneleg_move(self, [20, 20, 80], "back_L", commend)
+            motion.oneleg_move(self, [20, 20], 80, "back_L", commend)
             motion.body_move(self, [-20, -20], commend) 
 
-            motion.oneleg_move(self, [-20, -20, 80], "front_R", commend)
+            motion.oneleg_move(self, [-20, -20], 80, "front_R", commend)
 
             motion.body_move(self, [-20, 20], commend)
 
         ###멈추기###
         
-        motion.oneleg_move(self, [20, -20, 40], "back_R", commend)
+        motion.oneleg_move(self, [20, -20], 40, "back_R", commend)
         motion.body_move(self, [-20, 20], commend) 
 
-        motion.oneleg_move(self, [-20, 20, 40], "front_L", commend)
+        motion.oneleg_move(self, [-20, 20], 40, "front_L", commend)
         motion.body_move(self, [20, -20], commend) 
 
     def right(self, commend, run): #객체지향화 하기
@@ -390,7 +443,7 @@ class motion(functions):
         control.commend_run(self, commend, walksp)
         control.commend_set(self, commend)
 
-    def oneleg_move(self, A, leg, commend): #A 는 [20, 5] 가 적당
+    def oneleg_move(self, A, B, leg, commend): #A 는 [20, 5] 가 적당
 
         walksp = 400
         front_R = functions.dot_move(self, 'x', A[0], commend[0][0])
@@ -427,7 +480,7 @@ class motion(functions):
         control.commend_run(self, commend, walksp)
         control.commend_set(self, commend)
 
-        dot3 = functions.dot_move(self, 'x', A[2], dot3)
+        dot3 = functions.dot_move(self, 'x', B, dot3)
 
         control.commend(self, commend, leg, dot3, "linear")
 
@@ -553,8 +606,28 @@ class motion(functions):
         control.commend_run(self, commend, 200)
         control.commend_set(self, commend)
 
+    def cg_calc(self, commend, R): # R 은 내분비율
+        dot = self.dot
+    
+        [l1, l2, w] = [40, 140, 75] #하드웨어 치수
+        [dot1, dot2, dot3, dot4] = [commend[0][0], commend[1][0], commend[2][0], commend[3][0]]
+        [fr, fl, br, bl] = [[-w/2-dot1[0], -l2+dot1[1]], [w/2+dot2[0], -l2+dot2[1]], [-w/2-dot3[0], l1+dot3[1]], [w/2+dot4[0], l1+dot4[1]]]
 
+        a = float(((bl[0] - fr[0])/(bl[1] - fr[1])))
+        b = float(fr[1] - a * fr[0])
+        c = float(((fl[0] - br[0])/(fl[1] - br[1])))
+        d = float(fl[1] - c * fl[0])
 
+        x=Symbol('x') #교차점 구함
+        equation = (a - c) * x +(b - d)
+        c_x = float(solve(equation)[0])
+        c_y = float(a * c_x + b)
 
+        dot_c = [c_x, c_y]
+        dot_fr = [(R * c_x + bl[0])/(R+1), (R * c_y + bl[1])/(R+1)]
+        dot_fl = [(R * c_x + br[0])/(R+1), (R * c_y + br[1])/(R+1)]
+        dot_br = [(R * c_x + fl[0])/(R+1), (R * c_y + fl[1])/(R+1)]
+        dot_bl = [(R * c_x + fr[0])/(R+1), (R * c_y + fr[1])/(R+1)]
 
+        return [dot_c, dot_fr, dot_fl, dot_br, dot_bl]
 
